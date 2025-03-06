@@ -248,7 +248,7 @@ class materialFrame(tk.Frame):
         cursor.execute(sql2)
         aa = self.en_materialNamess.get()
         bb = self.en_materialCodeL.get()
-        cursor.execute(f"INSERT INTO materialLList (materialCode,materialName) VALUES ({bb},{aa})")
+        cursor.execute("INSERT INTO materialLList (materialCode, materialName) VALUES (%s, %s)", (bb, aa))
         connection.commit()
 
 
