@@ -41,14 +41,14 @@ class chattingFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
         self.entry.pack(side=tk.LEFT,fill=tk.X,expand=True,padx=5,pady=5)
 
         #제일 아래 버튼
-        self.bt_mainBt = tk.Button(self.fr_buttom,text="메인",width=11,height=70)
-        self.bt_mainBt.place(x=0,y=0)
-        self.bt_chatList = tk.Button(self.fr_buttom,text='채팅방목록',width=11,height=70,background='yellow')
-        self.bt_chatList.place(x=89,y=0)
-        self.bt_department = tk.Button(self.fr_buttom,text='인사팀',width=11,height=70,background='green')
-        self.bt_department.place(x=175,y=0)
-        self.bt_groupChat = tk.Button(self.fr_buttom,text='단체방만들기',width=11,height=70,background='pink')
-        self.bt_groupChat.place(x=262,y=0)
+        self.bt_mainBt = tk.Button(self.fr_buttom,text="메인",width=11)
+        self.bt_mainBt.place(x=0,y=0,height=70)
+        self.bt_chatList = tk.Button(self.fr_buttom,text='채팅방목록',width=11,background='yellow')
+        self.bt_chatList.place(x=89,y=0,height=70)
+        self.bt_department = tk.Button(self.fr_buttom,text='인사팀',width=11,background='green')
+        self.bt_department.place(x=175,y=0,height=70)
+        self.bt_groupChat = tk.Button(self.fr_buttom,text='단체방만들기',width=11,background='pink')
+        self.bt_groupChat.place(x=262,y=0,height=70)
 
 # 테스트용 코드
 if __name__ == "__main__":
@@ -58,3 +58,10 @@ if __name__ == "__main__":
     fr = chattingFrame(r)
     fr.place(x=1, y=0)
     r.mainloop()
+#
+# self.bt_mainBt = tk.Button(self.fr_buttom, text="메인", width=11, font=("맑은 고딕", 10))
+# self.bt_mainBt.place(x=0, y=0, width=87, height=70)  # 버튼 너비를 정확히 조정
+self.bt_mainBt.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+self.bt_chatList.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+self.bt_department.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+self.bt_groupChat.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
