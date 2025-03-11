@@ -1,10 +1,11 @@
+
 import tkinter as tk
 import tkinter.messagebox as msgbox
 
 from color import Color
 
 
-# 최종 수정일 250307 15:28
+# 최종 수정일 250311 16:18
 class TableWidget(tk.Frame):
     def __init__(self, master, padding=0, data=None, cols=0, new_row=True, has_checkbox=True, col_name=None,
                  col_width=None, col_align=None, editable=None, padx=None, pady=None, **kwargs):
@@ -153,6 +154,11 @@ class TableWidget(tk.Frame):
         else:
             self.draw_table()
 
+    # 테이블 갱신 (테스트 필요)
+    def refresh(self, data):
+        self.from_data(data=data, new_row=self.new_row, has_checkbox=self.has_checkbox, col_name=self.col_name,
+                       col_width=self.col_widths, col_align=self.col_align, editable=self.editable)
+
     # 선택된 셀의 값 가져오기
     def get(self):
         if self.rows == 0:
@@ -179,7 +185,7 @@ class TableWidget(tk.Frame):
     def checked_data(self):
         return [i["data"] for i in self.data.values() if i["checked"]]
 
-    # index로부터 key 찾기 
+    # index로부터 key 찾기
     def get_key(self, index):
         return list(self.data.keys())[index]
 
@@ -275,8 +281,8 @@ class TableWidget(tk.Frame):
                 x2 = x1 + self.col_widths[col]
 
                 self.canvas.create_rectangle(x1, y1, x2, y2, outline=Color.BLACK,
-                                             fill=Color.GRAY if current_row == self.selected_row else Color.WHITE,
-                                             tags="cell")
+                                             fill=Color.GRAY if current_row == self.selected_row or not self.editable[
+                                                 col] else Color.WHITE, tags="cell")
                 if self.col_align[col] == "center":
                     self.canvas.create_text(x1 + self.col_widths[col] / 2, y1 + self.cell_height / 2,
                                             text=self.get_data_from_cell(current_row, col), font=self.font, tags="text",

@@ -1,6 +1,8 @@
 import datetime
 import tkinter as tk
 import tkinter.ttk as ttk
+from re import search
+
 from tkcalendar import DateEntry
 import tablewidget
 import pymysql
@@ -83,7 +85,7 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
         self.bt_create = tk.Button(self.fr_right, text="생성", width=7, command=self.aaaa)
         self.bt_create.place(x=250, y=100)
 
-        self.bt_read = tk.Button(self.fr_right, text="조회",width=7)
+        self.bt_read = tk.Button(self.fr_right, text="조회",width=7,command=self.search)
         self.bt_read.place(x=250, y=50)
 
         self.bt_modify = tk.Button(self.fr_right, text="수정",width=7)
@@ -92,7 +94,7 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
         self.bt_delete = tk.Button(self.fr_right, text="삭제",width=7)
         self.bt_delete.place(x=250, y=200)
 
-        self.bt_save = tk.Button(self.fr_right, text="저장",width=7, command=self.createDB)
+        self.bt_save = tk.Button(self.fr_right, text="저장",width=7, command=self.save)
         self.bt_save.place(x=250, y=250)
 
         # 왼쪽 화면, 생성 버튼 누르면 나오는 화면
@@ -227,62 +229,28 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
 
 
 
-        app1 = tablewidget.TableWidget(self.fr_buttom,
+        self.app1 = tablewidget.TableWidget(self.fr_buttom,
                                        data=material_data,
                                        col_name=col_name,
                                        col_width=col_width,
                                        width=1300,
                                        height=400)
-        app1.grid(row=1, column=0, columnspan=2)
+        self.app1.grid(row=1, column=0, columnspan=2)
 
 
         self.bind("<F5>", lambda e: test())
 
         def test():
-            print(f"data: {app1.data}")  # 저장된 데이터
-            print(f"rows cols: {app1.rows} {app1.cols}")  # 행 열 개수
-            print(f"selected: {app1.selected_row} {app1.selected_col}")  # 선택된 행 열 index
-            print(f"changed {app1.changed}")  # 원본 대비 변경된 데이터
+            print(f"data: {self.app1.data}")  # 저장된 데이터
+            print(f"rows cols: {self.app1.rows} {self.app1.cols}")  # 행 열 개수
+            print(f"selected: {self.app1.selected_row} {self.app1.selected_col}")  # 선택된 행 열 index
+            print(f"changed {self.app1.changed}")  # 원본 대비 변경된 데이터
 
         connection.close()
-
-
-    def onKey(self, e):
-        print(e.keycode)
-        if e.keycode == 113:
-            data = [['00001', '(주)이상한과자가게전천당', '123-34-45678', '성진하'],
-                    ['00002', '양가게전천당', '123-34-45678', '양승준'],
-                    ['10101', '박민환가게전천당', '123-34-45678', '박민환'],
-                    ['20201', '이상한과자', '123-34-45678', '성진하'],
-                    ['30302', '이', '123-34-45678', '이윤서']]
-            naviData = {"검색유형": ['거래처코드', '거래처명','대표자 성명'],
-                        "data": data,
-                        "cols": 4,
-                        "new_row": False,
-                        "col_name": ['거래처코드', '거래처명', '사업자등록번호', '대표자 성명'],
-                        "col_width": [80, 220, 125, 101],
-                        "col_align": ['center', 'left', 'center', 'center'],
-                        "editable": [False, False, False, False]
-                        }
-            fr = naviframe.NaviFrame(self.root, naviData, [self.en_correspondentCodeL])
-            fr.place(x=500, y=300)
-
-     #저장 버튼 누르면 DB 생성된후 입력된 값에 따른 테이블 생성
-
-    def createDB(self):
-        print("함수실행")
-        connection = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='0000',
-            port=3306,
-        )
-
-        cursor = connection.cursor()
-        sql = "CREATE DATABASE IF NOT EXISTS mtest"  # DB생성
-        cursor.execute(sql)
-        connection.commit()
-
+    @staticmethod
+    def f20404(**kwargs):  #저장버튼
+        #print(kwargs) #디버깅
+        #print(kwargs.values()) #디버깅
         connection = pymysql.connect(
             host='localhost',
             user='root',
@@ -290,31 +258,130 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
             port=3306,
             database='mtest'
         )
-
-        # DATE = datetime.datetime.now().strftime('%Y-%m-%d')
+        print(kwargs.values())
         cursor = connection.cursor()
-        sql2 = """
-            CREATE TABLE IF NOT EXISTS mtable4(
-                materialCode varchar(255) not null primary key,
-                materialName varchar(255),
-                materialType varchar(10),
-                price int(10),
-                sellingPrice int(15),
-                purchasePrice int(15),
-                unit varchar(10),
-                weight int(10),
-                correspondentCode varchar(15),
-                correspondentName varchar(15),
-                Date_up varchar(10),
-                department varchar(10),
-                manager char(10)
-            )
-        """
-        cursor.execute(sql2)
+        lista = []
+        for i in kwargs.values():
+            lista.append(i)
+        print(lista)
+        for i in range(len(lista)):
+            if lista[i] == "":
+                lista[i] = None
+        print(lista)
+        cursor.execute("""
+               INSERT INTO mtable4 (
+                   materialCode, materialName, materialType, price, sellingPrice, purchasePrice,
+                   unit, weight, correspondentCode, correspondentName, Date_up, department, manager
+               )
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+           """, lista)
 
-    # 저장 및 수정할때 넘겨야할 dict
-    def save (self):
-        # 키 목록
+        connection.commit()
+
+        #if문 써서 저장 잘 됐으면 "sign":1로 안됐으면 0으로 해야함
+        return {"sign": 1, "data": []}
+
+
+    @staticmethod
+    def f20402(**kwargs): #조회버튼
+        connection = pymysql.connect(
+            host='localhost',
+            user='root',
+            password='0000',
+            port=3306,
+            database='mtest'
+        )
+        base_query = "SELECT * FROM mtable4"
+        cursor = connection.cursor()
+        test = []
+        for key, value in kwargs.items():
+            if key == "aa":
+                continue
+            if key == "Date_up":
+                f"Date_up between {kwargs.get("aa")} and {value}"
+            elif value != "":
+                test.append(f"{key} = '{value}'")
+
+        if test:
+            query = f"{base_query} WHERE {' AND '.join(test)}"
+            print(query)
+            # query = f"{base_query} where "
+        else:
+            query = base_query
+        cursor.execute(query)
+        search_data = cursor.fetchall()
+        material_data = [list(row) for row in search_data]
+        print(material_data)
+        return {'sign':1, "data":material_data}
+
+
+        # " AND ".join(test)
+        # # test = ["1", "2", "3"]
+        # "자재명 = 밀가루 AND 담당자 = 이윤서"
+        # for key, value in kwargs.items():
+        #     if value != "":
+        #         connection = pymysql.connect(
+        #             host='localhost',
+        #             user='root',
+        #             password='0000',
+        #             port=3306,
+        #             database='mtest'
+        #         )
+        #         cursor = connection.cursor()
+        #         sql = f"SELECT * FROM mtable4 WHERE {key} IN {value}"
+        #         cursor.execute(sql)
+        #         connection.commit()
+        #         search_data = cursor.fetchall()
+        #
+        #         cursor.close()
+        #         connection.close()
+        #
+        #         # 불러온 데이터를 리스트로 변환
+        #         material_data = [list(row) for row in search_data]
+        #
+        #         return material_data
+
+        # print(lista)
+        # return {"sign": 1, "data": []}
+
+    # def f20402_2(**kwargs):
+    #     connection = pymysql.connect(
+    #         host='localhost',
+    #         user='root',
+    #         password='0000',
+    #         port=3306,
+    #         database='mtest'
+    #     )
+    #     cursor = connection.cursor()
+    #
+    #     # 동적 SQL 쿼리 생성
+    #     base_query = "SELECT * FROM mtable4"
+    #     if kwargs:
+    #         conditions = []
+    #         params = []
+    #         for key, value in kwargs.items():
+    #             conditions.append(f"{key} = %s")
+    #             params.append(value)
+    #         query = f"{base_query} WHERE {' AND '.join(conditions)}"
+    #     else:
+    #         query = base_query
+    #         params = []
+    #
+    #     # 쿼리 실행
+    #     cursor.execute(query, params)
+    #     search_data = cursor.fetchall()
+    #
+    #     # 데이터베이스 연결 종료
+    #     cursor.close()
+    #     connection.close()
+    #
+    #     # 불러온 데이터를 리스트로 변환
+    #     material_data = [list(row) for row in search_data]
+    #
+    #     return material_data
+
+    #저장 버튼 누를때 실행되는 함수
+    def save(self):
         keys = ['자재코드', '자재명', '자재유형', '단가', '판매가', '구매가',
                 '단위', '무게', '거래처코드', '거래처명', '날짜', '부서', '담당자']
 
@@ -326,15 +393,44 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
             self.en_correspondentNameL.get(), self.en_date.get(), self.en_departmentL.get(),
             self.en_managerL.get()
         ]
-
         # 딕셔너리 생성
-        return dict(zip(keys, values))
+        d = dict(zip(keys, values))
+        return self.f20404(**d)
 
-    #조회 할때 서버에 넘겨야할 dict
+    #조회버튼 누를 때 실행되는 함수
     def search(self):
-        keys = ['날짜','담당자','부서','자재명','자재코드','자재유형','거래처명','거래처코드']
-        values = [self.cal,self.cal2,self.en_manager,self.en_department,self.en_materialName,self.en_materialCode,self.com_materialType,self.en_correspondentName,self.en_correspondentCode]
-        return dict(zip(keys, values))
+        connection = pymysql.connect(
+            host='localhost',
+            user='root',
+            password='0000',
+            port=3306,
+            database='mtest'
+        )
+        cursor = connection.cursor()
+        keys = ['aa', 'Date_up', 'manager', 'department', 'materialName', 'materialCode', 'materialType', 'correspondentName', 'correspondentCode']
+        values = [self.cal.get_date().strftime('%Y%m%d') if self.cal.get() else None, self.cal2.get_date().strftime('%Y%m%d') if self.cal2.get() else None, self.en_manager.get(), self.en_department.get(), self.en_materialName.get(), self.en_materialCode.get(),
+                  self.com_materialType.get(), self.en_correspondentName.get(), self.en_correspondentCode.get()]
+
+        d = dict(zip(keys, values))
+        result = self.f20402(**d) #return으로 {"sign":1, "data":material_data} , material_data
+        # # 테이블 갱신
+        self.app1.refresh(result["data"])
+
+
+    # def search_query(self):
+    #     aa = self.en_materialCodeL.get()
+    #     bb = self.en_materialNameL.get()
+    #     cc = self.com_materialType.get()
+    #     dd = self.en_price.get()
+    #     ee = self.en_sellingPrice.get()
+    #     ff = self.en_purchasePrice.get()
+    #     gg = self.en_unit.get()
+    #     hh = self.en_weight.get()
+    #     ii = self.en_correspondentCode.get()
+    #     jj = self.en_correspondentName.get()
+    #     kk = self.en_date.get()
+    #     ll = self.en_department.get()
+    #     mm = self.en_managerL.get()
 
     def delete(self):
         keys=['자재코드']
@@ -357,7 +453,7 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
         # mm = self.en_managerL.get()
         #
         # # 리스트로 묶기
-        # lista = [aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm]
+
         #
         #
         # # # 빈 문자열을 None으로 처리
@@ -385,15 +481,7 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
 
 
         #
-        # cursor.execute("""
-        #     INSERT INTO mtable4 (
-        #         materialCode, materialName, materialType, price, sellingPrice, purchasePrice,
-        #         unit, weight, correspondentCode, correspondentName, Date_up, department, manager
-        #     )
-        #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        # """, lista)
-        #
-        # connection.commit()
+
 
     #생성 버튼 누르면 entry 활성화 됨.
     def aaaa(self):
@@ -413,7 +501,17 @@ class materialFrame(tk.Frame): #자재조회 프레임 class, tk.Frame class를 
 
 
 
-
+     # connection = pymysql.connect(
+        #     host='localhost',
+        #     user='root',
+        #     password='0000',
+        #     port=3306,
+        # )
+        #
+        # cursor = connection.cursor()
+        # sql = "CREATE DATABASE IF NOT EXISTS mtest"  # DB생성
+        # cursor.execute(sql)
+        # connection.commit()
 
 
 # 테스트용 코드
